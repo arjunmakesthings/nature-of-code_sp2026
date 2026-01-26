@@ -25,6 +25,9 @@ let space = [
   ["z", "x", "c", "v", "b", "n", "m"],
 ];
 
+let prob_to_change = 0.1; //start with a very low probability to change.
+let rate_of_growth = 0.05;
+
 let str = "";
 
 //html stuff: 
@@ -44,15 +47,26 @@ function setup() {
 function handle_submit(e){
   //by default, the browser reloads when a form is submitted. we need to prevent that. 
   e.preventDefault(); 
+
   str = input.value.trim(); //take the value submitted, remove whitespace. 
+
+  content_p.innerHTML = str; //show what has been typed. 
 }
 
 function draw() {
-content_p.innerHTML=str; 
-console.log(str); 
-}
+  if (frameCount % 60 === 0 && str!=="" ){
+    //every 1 second. 
 
-let prob_to_change = 0.01;
+    str = get_new_word(); 
+    content_p.innerHTML+=" " + str; 
+
+    //we want the probability to change exponentially. 
+    prob_to_change *= 1 + rate_of_growth;
+    prob_to_change = constrain(prob_to_change, 0, 1);
+
+    console.log(prob_to_change); 
+  }
+}
 
 //helper to generate a new word based on whatever str is. 
 function get_new_word() {
@@ -66,7 +80,7 @@ function get_new_word() {
     let neighbours = get_neighbours(ch);
     if (neighbours.length === 0) continue; //if there are no neighbours, move to the next iteration. although this isn't possible, but fail-safe.
 
-    let n = random(1); //pick a random number.
+    let n = random(1); //pick a random number. this returns a number like so: 0.9211030989418209. 
 
     if (n > prob_to_change) {
       continue; //doesn't need to be changed.
