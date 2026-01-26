@@ -25,26 +25,31 @@ let space = [
   ["z", "x", "c", "v", "b", "n", "m"],
 ];
 
-let str = "ketchup";
+let str = "";
 
-// ui stuff: 
-let margin = 50; 
-let input; 
+//html stuff: 
+let content_p, form, input; //html variables.
 
 function setup() {
-  createCanvas(windowWidth, windowHeight); 
+  noCanvas(); 
 
-  input = createInput();
-  input.position(0, 100);
+  content_p  = document.getElementById("content"); 
+
+  form = document.getElementById("input_form");
+  input = document.getElementById("word_input");
+
+  form.addEventListener("submit", handle_submit);
+}
+
+function handle_submit(e){
+  //by default, the browser reloads when a form is submitted. we need to prevent that. 
+  e.preventDefault(); 
+  str = input.value.trim(); //take the value submitted, remove whitespace. 
 }
 
 function draw() {
-  background(0);
-
-  let new_word = get_new_word(); 
-
-  console.log(new_word);
-  noLoop();
+content_p.innerHTML=str; 
+console.log(str); 
 }
 
 let prob_to_change = 0.01;
