@@ -1,0 +1,49 @@
+h1{
+    font-family: "Crimson Pro", serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 36px; 
+
+    margin-bottom: 0.2em;
+
+    line-height: 1.2em;
+}
+h2{
+    margin-top: 0;
+    font-family: "Crimson Pro", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px; 
+
+    line-height: 1.4em;
+    color: grey;
+
+    margin-bottom: 2em;
+}
+h3{
+    font-family: "Crimson Pro", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 12px; 
+    color: grey; 
+    position: absolute;
+    bottom: 0; 
+}
+p{
+    font-family: "Crimson Pro", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px; 
+    color: black; 
+    margin: 1em 0;
+}
+html {
+    max-width: 720px;      /* change as needed */
+    margin: 0 auto;        /* center the column */
+    padding: 1rem;
+  }
+p, h1, h2, h3 {
+    overflow-wrap: break-word; /* allow long words to wrap */
+    word-break: break-word;
+    hyphens: auto;
+  }

@@ -1,6 +1,4 @@
-//the definitive collection of typos for a given word. 
-
-// a collection of all possible typos for a given word. 
+//the definitive list of typos for a given word.
 // arjun; january, 2026.
 
 /*
@@ -33,11 +31,18 @@ let rate_of_growth = 0.05;
 let str = ""; //i use this as a variable to store manipulations.
 let original_word = ""; //i use this to store the original word that was entered by the person.
 
+let resulted_words = []; //variable to store all the words that my get_new_word function output.
+
 //html stuff:
-let content_p, form, input; //html variables.
+let content_p, form, input, heading, sub_heading; //html variables.
+
+let end_p;
 
 function setup() {
   noCanvas();
+
+  heading = document.querySelector("h1");
+  sub_heading = document.querySelector("h2");
 
   content_p = document.getElementById("content");
 
@@ -55,6 +60,12 @@ function handle_submit(e) {
   str = original_word; //at the start of the sketch, my manipulated string is the same as the original word.
 
   content_p.innerHTML = str; //show what has been typed.
+  resulted_words.push(original_word); //also store the original word, so that it isn't displayed again.
+
+  // hide the form & description, update header: 
+  form.style.display = "none";
+  sub_heading.style.display = "none";
+  heading.textContent = `the definitive list of acceptable typos for ${original_word}:`;
 }
 
 function draw() {
@@ -67,51 +78,66 @@ function draw() {
     str = get_new_word();
     //this returns a string.
 
-    //update the paragraph with the string you received.
-    content_p.innerHTML += " " + str;
+    if (str === null) {
+      end_p = createP("fin.");
+      end_p.classList.add("ender");
+      noLoop();
+    } else {
+      //update the paragraph with the string you received.
+      content_p.innerHTML += ", " + str;
 
-    //we want the probability to change exponentially.
-    prob_to_change *= 1 + rate_of_growth;
-    prob_to_change = constrain(prob_to_change, 0, 1);
-
-    // console.log(prob_to_change);
+      //we want the probability to change exponentially.
+      prob_to_change *= 1 + rate_of_growth;
+      prob_to_change = constrain(prob_to_change, 0, 1);
+    }
   }
-
-  console.log(resulted_words); 
 }
-
-let resulted_words = []; //variable to store all the words that the function resulted in. 
 
 //helper to generate a new word based on whatever str is.
 function get_new_word() {
   let word; //variable to store the word that this function will generate.
 
-  //if i write a word, i want to have an iteration of the word with typos.
-  let chars = Array.from(original_word); //returns all characters of that string into a new array.
+  // i always look for unique words that haven't been spit out by this program in the past. these variables help me keep track.
+  let max_tries = 60; //safety to prevent infinite tries when it can't find a new word.
+  let current_tries = 0; //variable to keep track of how many times the program has run.
 
-  let is_unique_word = true;
+  //generate a new word.
+  while (current_tries < max_tries) {
+    current_tries++;
 
-  for (let i = 0; i < chars.length; i++) {
-    let ch = chars[i];
-    let neighbours = get_neighbours(ch);
-    if (neighbours.length === 0) continue; //if there are no neighbours, move to the next iteration. although this isn't possible, but fail-safe.
+    //if i write a word, i want to have an iteration of the word with typos.
+    let chars = Array.from(original_word); //returns all characters of that string into a new array.
 
-    let n = random(1); //pick a random number. this returns a number like so: 0.9211030989418209.
+    for (let i = 0; i < chars.length; i++) {
+      let ch = chars[i];
+      let neighbours = get_neighbours(ch);
+      // if (neighbours.length === 0) continue; //if there are no neighbours, move to the next iteration. although this isn't possible, but it's a fail-safe.
 
-    if (n > prob_to_change) {
-      continue; //doesn't need to be changed.
-    } else {
-      //needs to be changed.
-      chars[i] = neighbours[Math.floor(random(0, neighbours.length))];
+      let n = random(1); //pick a random number. this returns a number like so: 0.9211030989418209.
+
+      if (n > prob_to_change) {
+        continue; //doesn't need to be changed.
+      } else {
+        //needs to be changed.
+        chars[i] = neighbours[Math.floor(random(0, neighbours.length))];
+      }
     }
+
+    //change this into the string.
+    word = chars.join("");
+
+    //check if the word is unique
+    if (!resulted_words.includes(word)) {
+      //outputs:
+      resulted_words.push(word); //add to the array.
+      return word;
+    }
+
+    //otherwise, try again.
   }
 
-  //change this into the string.
-  word = chars.join("");
-
-  //outputs: 
-  resulted_words.push(word); //add to the array. 
-  return word;
+  //if we've reached here, there is no unique typo that can be generated.
+  return null;
 }
 
 //helper written by gpt to get neighbours of a particular character, based on the visual-representation i'd thought of.
