@@ -1,4 +1,6 @@
-// at what point is a typo not just a typo?
+//the definitive collection of typos for a given word. 
+
+// a collection of all possible typos for a given word. 
 // arjun; january, 2026.
 
 /*
@@ -28,15 +30,16 @@ let space = [
 let prob_to_change = 0.1; //start with a very low probability to change.
 let rate_of_growth = 0.05;
 
-let str = "";
+let str = ""; //i use this as a variable to store manipulations.
+let original_word = ""; //i use this to store the original word that was entered by the person.
 
-//html stuff: 
+//html stuff:
 let content_p, form, input; //html variables.
 
 function setup() {
-  noCanvas(); 
+  noCanvas();
 
-  content_p  = document.getElementById("content"); 
+  content_p = document.getElementById("content");
 
   form = document.getElementById("input_form");
   input = document.getElementById("word_input");
@@ -44,43 +47,56 @@ function setup() {
   form.addEventListener("submit", handle_submit);
 }
 
-function handle_submit(e){
-  //by default, the browser reloads when a form is submitted. we need to prevent that. 
-  e.preventDefault(); 
+function handle_submit(e) {
+  //by default, the browser reloads when a form is submitted. we need to prevent that.
+  e.preventDefault();
 
-  str = input.value.trim(); //take the value submitted, remove whitespace. 
+  original_word = input.value.trim();
+  str = original_word; //at the start of the sketch, my manipulated string is the same as the original word.
 
-  content_p.innerHTML = str; //show what has been typed. 
+  content_p.innerHTML = str; //show what has been typed.
 }
 
 function draw() {
-  if (frameCount % 60 === 0 && str!=="" ){
-    //every 1 second. 
+  if (frameCount % 60 === 0 && str !== "") {
+    //every 1 second.
 
-    str = get_new_word(); 
-    content_p.innerHTML+=" " + str; 
+    str = ""; //empty string.
 
-    //we want the probability to change exponentially. 
+    // get a new word on the original word:
+    str = get_new_word();
+    //this returns a string.
+
+    //update the paragraph with the string you received.
+    content_p.innerHTML += " " + str;
+
+    //we want the probability to change exponentially.
     prob_to_change *= 1 + rate_of_growth;
     prob_to_change = constrain(prob_to_change, 0, 1);
 
-    console.log(prob_to_change); 
+    // console.log(prob_to_change);
   }
+
+  console.log(resulted_words); 
 }
 
-//helper to generate a new word based on whatever str is. 
+let resulted_words = []; //variable to store all the words that the function resulted in. 
+
+//helper to generate a new word based on whatever str is.
 function get_new_word() {
-  let word; 
+  let word; //variable to store the word that this function will generate.
 
   //if i write a word, i want to have an iteration of the word with typos.
-  let chars = Array.from(str); //returns all characters of that string into a new array.
+  let chars = Array.from(original_word); //returns all characters of that string into a new array.
+
+  let is_unique_word = true;
 
   for (let i = 0; i < chars.length; i++) {
     let ch = chars[i];
     let neighbours = get_neighbours(ch);
     if (neighbours.length === 0) continue; //if there are no neighbours, move to the next iteration. although this isn't possible, but fail-safe.
 
-    let n = random(1); //pick a random number. this returns a number like so: 0.9211030989418209. 
+    let n = random(1); //pick a random number. this returns a number like so: 0.9211030989418209.
 
     if (n > prob_to_change) {
       continue; //doesn't need to be changed.
@@ -92,10 +108,13 @@ function get_new_word() {
 
   //change this into the string.
   word = chars.join("");
+
+  //outputs: 
+  resulted_words.push(word); //add to the array. 
   return word;
 }
 
-//helper written by gpt to get neighbours of a particular character, based on the visual-representation i'd thought of. 
+//helper written by gpt to get neighbours of a particular character, based on the visual-representation i'd thought of.
 function get_neighbours(char) {
   if (!char || typeof char !== "string") return [];
   char = char.toLowerCase();
