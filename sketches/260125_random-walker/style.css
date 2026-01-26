@@ -36,6 +36,7 @@ p{
     font-size: 16px; 
     color: black; 
     margin: 1em 0;
+    line-height: 1.4em;
 }
 html {
     max-width: 720px;      /* change as needed */
@@ -46,4 +47,9 @@ p, h1, h2, h3 {
     overflow-wrap: break-word; /* allow long words to wrap */
     word-break: break-word;
     hyphens: auto;
+  }
+  .ender{
+    font-weight: 400 !important; 
+    color: grey !important; 
+    margin-top: 2em !important;
   }

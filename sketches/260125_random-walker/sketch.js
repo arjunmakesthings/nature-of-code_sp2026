@@ -80,7 +80,7 @@ function draw() {
 
     if (str === null) {
       end_p = createP("fin.");
-      end_p.classList.add("ender");
+      end_p.addClass('ender');
       noLoop();
     } else {
       //update the paragraph with the string you received.
