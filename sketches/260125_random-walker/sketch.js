@@ -16,7 +16,9 @@ q w e r t y u i o p
 a s d f g h j k l
 z x c v b n m
 
-each letter can be thought of as a point in two-dimensional space. going by the random walker algorithm, each letter has a maximum of 8 possibilities to move to, and a minimum of 1.
+each letter can be thought of as a point in two-dimensional space. going by the random-walker algorithm, each letter has a maximum of 8 possibilities to move to, and a minimum of 1. 
+
+in my sketch, the probability for a character of a word to move to its neighbours also exponentially increases with the function: prob_to_change *= 1 + rate_of_growth. 
 */
 
 let space = [
@@ -62,7 +64,7 @@ function handle_submit(e) {
   content_p.innerHTML = str; //show what has been typed.
   resulted_words.push(original_word); //also store the original word, so that it isn't displayed again.
 
-  // hide the form & description, update header: 
+  // hide the form & description, update header:
   form.style.display = "none";
   sub_heading.style.display = "none";
   heading.textContent = `the definitive list of acceptable typos for ${original_word}:`;
@@ -80,7 +82,7 @@ function draw() {
 
     if (str === null) {
       end_p = createP("fin.");
-      end_p.addClass('ender');
+      end_p.addClass("ender");
       noLoop();
     } else {
       //update the paragraph with the string you received.
