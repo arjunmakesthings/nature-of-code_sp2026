@@ -83,6 +83,7 @@ function draw() {
     if (str === null) {
       end_p = createP("fin.");
       end_p.addClass("ender");
+      end_p.parent(document.querySelector("main"));
       noLoop();
     } else {
       //update the paragraph with the string you received.
