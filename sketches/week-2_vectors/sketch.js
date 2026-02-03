@@ -1,4 +1,4 @@
-//untitled; arjun; month, 2026.
+//love is a vector in space; arjun; february, 2026.
 
 /*
 ask: 
@@ -29,20 +29,19 @@ const skins = [
   "#DEB887", // Burlywood
 ];
 
-let size_range = [2, 10];
+let size_range = [2, 10]; //of a person. 
 
 //ui stuff:
 let margin = 50;
 
 function setup() {
-  // createCanvas(1000, 562); //in 16:9 aspect ratio.
-  createCanvas(800, 800, WEBGL); //square to handle calculations better.
+  createCanvas(800, 800); //square to handle calculations better.
 
   for (let i = 0; i < population; i++) {
-    people.push(new Person(random(margin, width - margin), random(margin, height - margin), random(margin, width - margin)));
+    people.push(new Person(random(margin, width - margin), random(margin, height - margin)));
   }
 
-  //god assigns a partner to each person at birth.
+  //god (or the algorithm) assigns a partner to each person at birth.
   assign_partner();
 
   //white screen:
@@ -66,58 +65,127 @@ function assign_partner() {
 }
 
 function draw() {
-  background(255);
-
-  orbitControl();
-
-  push();
-  translate(-width / 2, -height / 2);
+  background(255, 5);
   for (person of people) {
     person.red_line();
     person.display();
+    person.move();
+    person.die();
+  }
 
-    if (frameCount % 60 == 0){
-      //every one second: 
-      person.move(); 
+  death_handler(); 
+}
+
+/* made a l.l.m. write this helper: */
+let unpairedDeaths = [];
+
+function death_handler() {
+  // add newly dead to the queue
+  unpairedDeaths.push(...people.filter((p) => p.dead));
+
+  // remove dead from main array
+  people = people.filter((p) => !p.dead);
+
+  // remove dead partners
+  for (let p of people) {
+    if (p.partner && p.partner.dead) {
+      p.partner = null;
     }
   }
-  pop();
+
+  // while we have at least 2 unpaired deaths, make new pairs
+  while (unpairedDeaths.length >= 2) {
+    unpairedDeaths.splice(0, 2); // consume 2 dead
+
+    // create two new people
+    let newPerson1 = new Person(random(margin, width - margin), random(margin, height - margin));
+    let newPerson2 = new Person(random(margin, width - margin), random(margin, height - margin));
+
+    // pair them
+    newPerson1.partner = newPerson2;
+    newPerson2.partner = newPerson1;
+
+    // add to population
+    people.push(newPerson1);
+    people.push(newPerson2);
+  }
 }
 
 class Person {
-  constructor(x, y, z) {
-    this.pos = createVector(x, y, z);
-
-    this.dest_pos = createVector(x, y, z);
+  constructor(x, y) {
+    this.pos = createVector(x, y);
 
     this.size = Math.floor(random(size_range[0], size_range[1]));
 
-    this.skin_color = random(skins);
+    this.skin_color = color(random(skins));
 
-    this.prob = 0; 
+    this.pace = Math.floor(random(1,3)); //each person moves at a different speed. 
+
+    this.fate = 0;
+    this.distance = 0; //from partner.
+
+    this.vitality = 255; //everyone starts out strong.
+    this.skin_color.setAlpha(this.vitality); 
+
+    this.dead = false;
+
+    this.dying_rate = random(0.1, 0.8); 
   }
 
   display() {
     stroke(this.skin_color);
     strokeWeight(this.size);
     point(this.pos);
-
-    this.pos.x = lerp(this.pos.x, this.dest_pos.x, 0.1);
-    this.pos.y = lerp(this.pos.y, this.dest_pos.y, 0.1);
-    this.pos.z = lerp(this.pos.z, this.dest_pos.z, 0.1);
   }
 
   red_line() {
     if (this.partner && people.indexOf(this) < people.indexOf(this.partner)) {
-      //if a partner exists and this person comes first:
-      stroke(255, 0, 0);
-      strokeWeight(0.05);
-      line(this.pos.x, this.pos.y, this.pos.z, this.partner.pos.x, this.partner.pos.y, this.partner.pos.z);
+      //if a partner exists and this person comes first in the array (to avoid duplicates):
+      stroke(150, 0, 0);
+      strokeWeight(map(this.distance, 0, width, 0.001, 0.05));
+      line(this.pos.x, this.pos.y, this.partner.pos.x, this.partner.pos.y);
     }
   }
 
-  move(){
-    let step = createVector(random(-2, 2), random(-2, 2), random(-2, 2));
-    this.dest_pos.add(step);
+  move() {
+    let movement = createVector(random(this.pace * -1, this.pace), random(this.pace * -1, this.pace)); //every frame we are set to move. 
+
+    //however, if i am destined a partner, fate comes into play. 
+    if (this.partner) {
+      let to_partner = p5.Vector.sub(this.partner.pos, this.pos); //find the distance between the partner & myself. creates an arrow essentially. 
+
+      this.distance = to_partner.mag(); //just gives you the length, irrespective of direction. 
+
+      to_partner.normalize(); //scale magnitude to 1.
+
+      //stronger pull when far, lesser when close.
+      let attraction = to_partner.mult(this.fate * 0.8); 
+
+      // optional: fate grows slower if very far apart
+      this.fate = min(this.fate + 0.0003, 1);
+
+      movement.add(attraction); //my original random, but added with a little bit of fate. 
+
+      if (this.distance<1){
+        this.pace = 0.5; //when they meet, life slows down.
+      }
+    }
+
+    this.pos.add(movement);
+  }
+
+  die(){
+    //every frame, we are dying. if each frame is a day, and our average lifespan is 73 years, each person dies in about 26000 frames.
+    this.vitality = max(this.vitality - this.dying_rate, 0);
+
+    // pace slows as vitality fades
+    this.pace = map(this.vitality, 0, 255, 0.1, 2);
+
+    // update opacity to match vitality
+    this.skin_color.setAlpha(this.vitality);
+
+    if (this.vitality < 5){
+      this.dead = true;
+    }
   }
 }
