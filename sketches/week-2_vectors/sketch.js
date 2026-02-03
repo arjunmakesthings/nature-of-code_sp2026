@@ -29,7 +29,7 @@ const skins = [
   "#DEB887", // Burlywood
 ];
 
-let size_range = [2, 10]; //of a person. 
+let size_range = [2, 10]; //of a person.
 
 //ui stuff:
 let margin = 50;
@@ -73,7 +73,7 @@ function draw() {
     person.die();
   }
 
-  death_handler(); 
+  death_handler();
 }
 
 /* made a l.l.m. write this helper: */
@@ -119,17 +119,19 @@ class Person {
 
     this.skin_color = color(random(skins));
 
-    this.pace = Math.floor(random(1,3)); //each person moves at a different speed. 
+    this.pace = Math.floor(random(1, 3)); //each person moves at a different speed.
+
+    this.starting_pace = this.pace;
 
     this.fate = 0;
     this.distance = 0; //from partner.
 
     this.vitality = 255; //everyone starts out strong.
-    this.skin_color.setAlpha(this.vitality); 
+    this.skin_color.setAlpha(this.vitality);
 
     this.dead = false;
 
-    this.dying_rate = random(0.1, 0.8); 
+    this.dying_rate = random(0.0005, 0.5);
   }
 
   display() {
@@ -148,25 +150,25 @@ class Person {
   }
 
   move() {
-    let movement = createVector(random(this.pace * -1, this.pace), random(this.pace * -1, this.pace)); //every frame we are set to move. 
+    let movement = createVector(random(this.pace * -1, this.pace), random(this.pace * -1, this.pace)); //every frame we are set to move.
 
-    //however, if i am destined a partner, fate comes into play. 
+    //however, if i am destined a partner, fate comes into play.
     if (this.partner) {
-      let to_partner = p5.Vector.sub(this.partner.pos, this.pos); //find the distance between the partner & myself. creates an arrow essentially. 
+      let to_partner = p5.Vector.sub(this.partner.pos, this.pos); //find the distance between the partner & myself. creates an arrow essentially.
 
-      this.distance = to_partner.mag(); //just gives you the length, irrespective of direction. 
+      this.distance = to_partner.mag(); //just gives you the length, irrespective of direction.
 
       to_partner.normalize(); //scale magnitude to 1.
 
       //stronger pull when far, lesser when close.
-      let attraction = to_partner.mult(this.fate * 0.8); 
+      let attraction = to_partner.mult(this.fate * 0.8);
 
       // optional: fate grows slower if very far apart
       this.fate = min(this.fate + 0.0003, 1);
 
-      movement.add(attraction); //my original random, but added with a little bit of fate. 
+      movement.add(attraction); //my original random, but added with a little bit of fate.
 
-      if (this.distance<1){
+      if (this.distance < 1) {
         this.pace = 0.5; //when they meet, life slows down.
       }
     }
@@ -174,17 +176,17 @@ class Person {
     this.pos.add(movement);
   }
 
-  die(){
+  die() {
     //every frame, we are dying. if each frame is a day, and our average lifespan is 73 years, each person dies in about 26000 frames.
-    this.vitality = max(this.vitality - this.dying_rate, 0);
+      this.vitality = max(this.vitality - this.dying_rate, 0);
 
     // pace slows as vitality fades
-    this.pace = map(this.vitality, 0, 255, 0.1, 2);
+    // this.pace = map(this.vitality, 0, 255, 0.1, this.starting_pace);
 
     // update opacity to match vitality
     this.skin_color.setAlpha(this.vitality);
 
-    if (this.vitality < 5){
+    if (this.vitality < 2) {
       this.dead = true;
     }
   }
