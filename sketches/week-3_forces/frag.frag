@@ -8,8 +8,6 @@ varying vec2 vTexCoord;
 // Custom uniforms.
 uniform sampler2D u_tex;
 
-uniform float u_time;
-
 void main() {
     vec4 texColor = texture2D(u_tex, vTexCoord);
     

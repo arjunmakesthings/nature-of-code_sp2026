@@ -1,4 +1,5 @@
-//untitled; arjun; february, 2026.
+// tinfoil-os
+// by arjun; february, 2026.
 
 /*
 ask: 
@@ -7,17 +8,14 @@ make a sketch with forces.
 
 /*
 thought: 
-
+just messed around with forces & things i picked up in another course.
 */
 
 let balls = [];
 let num = 200;
+let shuffled = [];
 
 let margin = 5;
-
-let tp_vectors = [];
-
-let shuffled = [];
 
 //shader stuff:
 let my_shader;
@@ -50,12 +48,6 @@ function setup() {
 }
 
 function draw() {
-  // background(255);
-
-  t = millis() * 1000;
-
-  // translate(-width / 2, -height / 2);
-
   shader(my_shader);
 
   my_shader.setUniform("u_res", [width, height]); //pass a uniform into the shader files as the resolution of the sketch.
@@ -72,6 +64,7 @@ function draw() {
 
   beginShape();
   for (let i = 0; i < shuffled.length - 2; i += 3) {
+    //every three vertices.
     let uv0 = createVector(shuffled[i].pos.x / width, shuffled[i].pos.y / height);
     let uv1 = createVector(shuffled[i + 1].pos.x / width, shuffled[i + 1].pos.y / height);
     let uv2 = createVector(shuffled[i + 2].pos.x / width, shuffled[i + 2].pos.y / height);
@@ -80,7 +73,6 @@ function draw() {
     uv2.sub(noise(frameCount * 0.01));
 
     uv1.mult(noise(frameCount * 0.001));
-  
 
     vertex(shuffled[i].pos.x, shuffled[i].pos.y, 0, uv0.x, uv0.y);
     vertex(shuffled[i + 1].pos.x, shuffled[i + 1].pos.y, 0, uv1.x, uv1.y);
@@ -100,7 +92,7 @@ function draw() {
 
       dir.normalize();
 
-      dir.mult(-0.001);
+      dir.mult(-0.001); //move away from each other.
       balls[i].applyForce(dir);
     }
   }
@@ -115,13 +107,12 @@ class Ball {
     this.speed = random(0.09, 0.5);
     this.vel = createVector(random(-this.speed, this.speed), random(-this.speed, this.speed));
   }
-  display() {
-    strokeWeight(5);
-    stroke(255);
-    vertex(this.pos);
-  }
+  // display() {
+  //   strokeWeight(5);
+  //   stroke(255);
+  //   vertex(this.pos);
+  // }
   move() {
-    // this.vel.mult(0.99); // Damping
     this.pos.add(this.vel);
   }
   stay_in() {
