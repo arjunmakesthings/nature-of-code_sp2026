@@ -76,8 +76,10 @@ function draw() {
     let uv1 = createVector(shuffled[i + 1].pos.x / width, shuffled[i + 1].pos.y / height);
     let uv2 = createVector(shuffled[i + 2].pos.x / width, shuffled[i + 2].pos.y / height);
 
-    uv0.mult(noise(frameCount * 0.01));
-    // uv2.sub(noise(frameCount * 0.00001));
+    uv0.add(noise(frameCount * 0.01));
+    uv2.sub(noise(frameCount * 0.01));
+
+    uv1.mult(noise(frameCount * 0.001));
   
 
     vertex(shuffled[i].pos.x, shuffled[i].pos.y, 0, uv0.x, uv0.y);
@@ -98,7 +100,7 @@ function draw() {
 
       dir.normalize();
 
-      dir.mult(0.001);
+      dir.mult(-0.001);
       balls[i].applyForce(dir);
     }
   }
