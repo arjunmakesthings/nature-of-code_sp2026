@@ -15,4 +15,5 @@ void main() {
     
     // texColor.b *= sin(u_time + vTexCoord.x / 0.05);
     gl_FragColor = texColor;
+    // gl_FragColor.a = 0.7;
 }

@@ -13,7 +13,7 @@ thought:
 let balls = [];
 let num = 200;
 
-let margin = 50;
+let margin = 5;
 
 let tp_vectors = [];
 
@@ -34,7 +34,7 @@ function setup() {
   // createCanvas(1000, 562); //in 16:9 aspect ratio.
   // createCanvas(800, 800); //square to handle calculations better.
 
-  createCanvas(640, 480, WEBGL);
+  createCanvas(windowWidth, windowHeight, WEBGL);
   cam = createCapture(VIDEO, { flipped: true });
   cam.hide();
 
@@ -45,17 +45,16 @@ function setup() {
   shuffled = balls.slice();
   shuffle(shuffled, true);
 
-  background(0);
+  background(255);
   noStroke();
 }
 
 function draw() {
-  background(0);
+  // background(255);
 
   t = millis() * 1000;
 
   // translate(-width / 2, -height / 2);
-  cam.loadPixels(); //i'm going to read it later in display().
 
   shader(my_shader);
 
@@ -63,7 +62,7 @@ function draw() {
 
   my_shader.setUniform("u_tex", cam); //set texture as uniform from cam.
 
-  my_shader.setUniform("u_time", millis() * 0.001); // pass seconds.
+  my_shader.setUniform("u_time", millis() * 0.01); // pass seconds.
 
   for (let ball of balls) {
     // ball.display();
@@ -71,21 +70,22 @@ function draw() {
     ball.stay_in();
   }
 
-  beginShape(QUAD_STRIP);
+  beginShape();
   for (let i = 0; i < shuffled.length - 2; i += 3) {
     let uv0 = createVector(shuffled[i].pos.x / width, shuffled[i].pos.y / height);
     let uv1 = createVector(shuffled[i + 1].pos.x / width, shuffled[i + 1].pos.y / height);
     let uv2 = createVector(shuffled[i + 2].pos.x / width, shuffled[i + 2].pos.y / height);
 
-    uv0.add(noise(frameCount * 0.01));
-    uv2.sub(noise(frameCount * 0.01));
+    uv0.mult(noise(frameCount * 0.01));
+    // uv2.sub(noise(frameCount * 0.00001));
+  
 
     vertex(shuffled[i].pos.x, shuffled[i].pos.y, 0, uv0.x, uv0.y);
     vertex(shuffled[i + 1].pos.x, shuffled[i + 1].pos.y, 0, uv1.x, uv1.y);
     vertex(shuffled[i + 2].pos.x, shuffled[i + 2].pos.y, 0, uv2.x, uv2.y);
   }
 
-  endShape(CLOSE);
+  endShape();
 
   for (let i = 0; i < balls.length; i++) {
     for (let j = 0; j < balls.length; j++) {
@@ -110,7 +110,7 @@ class Ball {
 
     this.mass = Math.floor(random(1, 10));
 
-    this.speed = random(0.1, 0.5);
+    this.speed = random(0.09, 0.5);
     this.vel = createVector(random(-this.speed, this.speed), random(-this.speed, this.speed));
   }
   display() {
