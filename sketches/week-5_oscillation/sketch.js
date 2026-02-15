@@ -97,37 +97,37 @@ class Mover {
   }
 }
 
-class better_vec {
-  static from_coords(x0, y0, x1, y1, show = false) {
-    if (show == true) {
-      //draw:
-      push();
-      translate(x0, y0);
-      let curr_vec = createVector(x1, y1).sub(x0, y0);
-      rotate(curr_vec.heading());
+// class better_vec {
+//   static from_coords(x0, y0, x1, y1, show = false) {
+//     if (show == true) {
+//       //draw:
+//       push();
+//       translate(x0, y0);
+//       let curr_vec = createVector(x1, y1).sub(x0, y0);
+//       rotate(curr_vec.heading());
 
-      stroke(255, 0, 0);
+//       stroke(255, 0, 0);
 
-      line(0, 0, curr_vec.mag(), 0);
+//       line(0, 0, curr_vec.mag(), 0);
 
-      fill(255, 0, 0);
+//       fill(255, 0, 0);
 
-      beginShape(TRIANGLES);
-      vertex(curr_vec.mag(), 0);
-      vertex(curr_vec.mag() - 10, 5);
-      vertex(curr_vec.mag() - 10, -5);
-      endShape();
+//       beginShape(TRIANGLES);
+//       vertex(curr_vec.mag(), 0);
+//       vertex(curr_vec.mag() - 10, 5);
+//       vertex(curr_vec.mag() - 10, -5);
+//       endShape();
 
-      pop();
-    }
-    return createVector(x1, y1).sub(x0, y0);
-  }
+//       pop();
+//     }
+//     return createVector(x1, y1).sub(x0, y0);
+//   }
 
-  static from_vec(vec1, vec2, show) {
-    if (show == true) {
-      stroke(255, 0, 0);
-      line(vec1.x, vec1.y, vec2.x, vec2.y);
-    }
-    return createVector(x1, y1).sub(x0, y0);
-  }
-}
+//   static from_vec(vec1, vec2, show) {
+//     if (show == true) {
+//       stroke(255, 0, 0);
+//       line(vec1.x, vec1.y, vec2.x, vec2.y);
+//     }
+//     return createVector(x1, y1).sub(x0, y0);
+//   }
+// }
