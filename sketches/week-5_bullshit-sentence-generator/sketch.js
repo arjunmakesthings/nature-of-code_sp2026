@@ -49,6 +49,8 @@ class Sentence {
     for (let i = 0; i < n; i++) {
       let character = String.fromCharCode(97 + floor(random(26))); // new letter every time
       let attract_type = Math.floor(random(0, 6));
+      x = random(0, width); 
+      y = random(0, width); 
       this.letters.push(new Letter(character, x, y, attract_type));
       x += textWidth(character) + 5; // increment x by the width of this character for the next one.
     }
@@ -57,6 +59,7 @@ class Sentence {
     for (let letter of this.letters) {
       letter.display();
       letter.move();
+      letter.find_partners(this.letters); //pass the entire array to each child.
     }
   }
 }
@@ -107,5 +110,15 @@ class Letter {
   }
   apply_force(force) {
     this.vel.add(force);
+  }
+  find_partners(letters) {
+    for (let other of letters) {
+      if (other == this) continue; //this means that the current letter is being checked.
+
+      if (other.attract_type === this.attract_type) {
+        strokeWeight(this.attract_type);
+        line(this.pos.x, this.pos.y, other.pos.x, other.pos.y);
+      }
+    }
   }
 }
