@@ -16,21 +16,24 @@ function setup() {
 
   textSize(16);
 
-  // letters[0] = new Letter(String.fromCharCode(97 + floor(random(26)))); //new letter every time.
+  //for debug; create one instance:
+  let n = round(randomGaussian(47, 20));
+  n = constrain(n, 17, 67);
+  sentences.push(new Sentence(n));
 }
 
 function draw() {
   background(0);
 
-  if (frameCount % new_words_at == 0) {
-    //every x seconds, make a new sentence.
+  // if (frameCount % new_words_at == 0) {
+  //   //every x seconds, make a new sentence.
 
-    //average sentence length is ~47 characters.
-    let n = round(randomGaussian(47, 20));
-    n = constrain(n, 17, 67);
+  //   //average sentence length is ~47 characters.
+  //   let n = round(randomGaussian(47, 20));
+  //   n = constrain(n, 17, 67);
 
-    sentences.push(new Sentence(n));
-  }
+  //   sentences.push(new Sentence(n));
+  // }
 
   for (let sentence of sentences) {
     sentence.run();
@@ -45,26 +48,29 @@ class Sentence {
 
     for (let i = 0; i < n; i++) {
       let character = String.fromCharCode(97 + floor(random(26))); // new letter every time
-      this.letters.push(new Letter(character, x, y));
-      x += textWidth(character); // increment x by the width of this character. 
+      let attract_type = Math.floor(random(0, 6));
+      this.letters.push(new Letter(character, x, y, attract_type));
+      x += textWidth(character) + 5; // increment x by the width of this character for the next one.
     }
   }
   run() {
     for (let letter of this.letters) {
       letter.display();
+      letter.move();
     }
   }
 }
 
 // a letter:
 class Letter {
-  constructor(alphabet, x, y) {
+  constructor(alphabet, x, y, attract_type) {
     this.alphabet = alphabet;
-
     this.pos = createVector(x, y);
-
+    this.vel = createVector(0, 0);
     this.w = textWidth(this.alphabet);
     this.h = textAscent() + textDescent();
+
+    this.attract_type = attract_type;
   }
   display() {
     noStroke();
@@ -74,5 +80,32 @@ class Letter {
     noFill();
     stroke(255);
     rect(this.pos.x, this.pos.y - textAscent(), this.w, this.h);
+  }
+  move() {
+    // this.apply_force(createVector(0,0.2));
+    this.pos.add(this.vel);
+
+    if (this.pos.y > height - this.h) {
+      this.pos.y = height - this.h;
+      this.vel.y *= -1;
+    }
+
+    if (this.pos.y < 0) {
+      this.pos.y = 0;
+      this.vel.y *= -1;
+    }
+
+    if (this.pos.x > width - this.w) {
+      this.pos.x = width - this.w;
+      this.vel.x *= -1;
+    }
+
+    if (this.pos.x < 0) {
+      this.pos.x = 0;
+      this.vel.x *= -1;
+    }
+  }
+  apply_force(force) {
+    this.vel.add(force);
   }
 }
