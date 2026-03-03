@@ -114,7 +114,6 @@ class Being {
     }
   }
   move() {
-    if (this.time )
   }
   static death() {}
 }
