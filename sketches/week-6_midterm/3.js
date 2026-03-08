@@ -6,6 +6,8 @@ the world has beings. beings do the following:
 - they exist. 
 - they die. 
 
+the world keeps time. each day is day_length units long. 
+
 */
 
 let world;
@@ -26,6 +28,8 @@ class World {
     this.y = y;
 
     this.beings = [];
+
+    this.time = 0; 
   }
   big_bang() {
     let x = width / 2;
@@ -38,6 +42,8 @@ class World {
     for (let being of this.beings) {
       being.live();
     }
+    keep_time(); 
+    console.log(time); 
   }
 }
 
@@ -51,14 +57,14 @@ class Being {
   }
   live() {
     this.show();
-    this.move();
+    // this.move();
   }
   show() {
     noFill();
     stroke(255);
     circle(this.pos.x, this.pos.y, 20);
   }
-  move() {
+  move(time) {
     this.pos.add(this.vel);
     this.constrain();
   }
@@ -74,7 +80,7 @@ class Being {
 }
 
 //helper to keep time.
-let day = 0;
+let day_length = 30;
 let time = [0, 0, 0, 0]; //ms, seconds, minutes, hours.
 
 function keep_time() {
@@ -84,7 +90,7 @@ function keep_time() {
   const hours = Math.floor(ms / (1000 * 60 * 60));
 
   //one minute loop.
-  if (seconds >= 30) {
+  if (seconds >= day_length) {
     day = millis();
     time[0] = 0;
     time[1] = 0;
