@@ -12,6 +12,11 @@ the world keeps time. each day is day_length units long.
 
 let world;
 
+//time stuff:
+let day_length = 10;
+let day = 0;
+let time = [0, 0, 0, 0]; //ms, seconds, minutes, hours.
+
 function setup() {
   createCanvas(1000, 1000);
 
@@ -29,7 +34,7 @@ class World {
 
     this.beings = [];
 
-    this.time = 0; 
+    this.time = 0;
   }
   big_bang() {
     let x = width / 2;
@@ -38,12 +43,11 @@ class World {
   }
   run() {
     background(0);
+    this.time = keep_time();
 
     for (let being of this.beings) {
-      being.live();
+      being.live(this.time);
     }
-    keep_time(); 
-    console.log(time); 
   }
 }
 
@@ -51,22 +55,27 @@ class Being {
   constructor(x, y) {
     this.pos = createVector(x, y);
     this.vel = createVector(3, 0);
+
+    //beings have houses, and other destinations that they frequent.
+    this.house = this.pos.copy();
+    this.other_destinations = this.pos.copy();
   }
   static birth(x, y) {
     return new Being(x, y);
   }
-  live() {
+  live(t) {
     this.show();
-    // this.move();
+    this.move(t);
   }
   show() {
     noFill();
     stroke(255);
     circle(this.pos.x, this.pos.y, 20);
   }
-  move(time) {
-    this.pos.add(this.vel);
+  move(t) {
     this.constrain();
+
+    console.log(t); 
   }
   constrain() {
     if (this.pos.x < 0 || this.pos.x > width) {
@@ -80,9 +89,6 @@ class Being {
 }
 
 //helper to keep time.
-let day_length = 30;
-let time = [0, 0, 0, 0]; //ms, seconds, minutes, hours.
-
 function keep_time() {
   const ms = millis() - day;
   const seconds = Math.floor(ms / 1000) % 60;
@@ -102,4 +108,6 @@ function keep_time() {
     time[2] = minutes;
     time[3] = hours;
   }
+
+  return time;
 }
