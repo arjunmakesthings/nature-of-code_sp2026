@@ -13,7 +13,7 @@ the world keeps time. each day is day_length units long.
 let world;
 
 //time stuff:
-let day_length = 10;
+let day_length = 24;
 let day = 0;
 let time = [0, 0, 0, 0]; //ms, seconds, minutes, hours.
 
@@ -45,6 +45,11 @@ class World {
     background(0);
     this.time = keep_time();
 
+    noStroke();
+    fill(255, 0, 0);
+
+    text("hour: " + this.time[1], 50, 50);
+
     for (let being of this.beings) {
       being.live(this.time);
     }
@@ -58,7 +63,44 @@ class Being {
 
     //beings have houses, and other destinations that they frequent.
     this.house = this.pos.copy();
-    this.other_destinations = this.pos.copy();
+    this.other_destinations = [];
+
+    this.other_destinations.push({ x: this.pos.x, y: this.pos.y });
+
+    this.other_destinations.push({ x: random(0, width), y: random(0, height) });
+
+    this.schedule = this.make_schedule();
+
+    this.new_pos = createVector(0, 0);
+
+    this.speed = random(2); //everyone moves at different speeds.
+  }
+
+  //constructor helper to make a schedule:
+  make_schedule() {
+    let f = 24;
+    let segments = Math.floor(random(3, 9));
+    let cuts = [0];
+
+    for (let i = 0; i < segments - 1; i++) {
+      let cut;
+      do {
+        cut = Math.floor(random(1, f));
+      } while (cuts.includes(cut));
+      cuts.push(cut);
+    }
+    cuts.push(f);
+
+    // Sort cut points
+    cuts.sort((a, b) => a - b);
+
+    // Build segments as [start, end] pairs
+    let schedule = [];
+    for (let i = 0; i < cuts.length - 1; i++) {
+      schedule.push([cuts[i], cuts[i + 1]]);
+    }
+
+    return schedule;
   }
   static birth(x, y) {
     return new Being(x, y);
@@ -75,7 +117,33 @@ class Being {
   move(t) {
     this.constrain();
 
-    console.log(t); 
+    //t[0] comes as a 24 second loop.
+
+    for (let i = 0; i < this.schedule.length; i++) {
+      if (i !== t[1]) continue; //if we're not checking against the current time, we don't care.
+
+      //if i is the current time:
+
+      if (i % 2 == 0) {
+        //starting number of a pair.
+        let n = Math.floor(random(this.other_destinations.length));
+        this.new_pos.set(this.other_destinations[n].x, this.other_destinations[n].y);
+      } else {
+        //ending number of a pair.
+      }
+
+      let d = p5.Vector.sub(this.new_pos, this.pos);
+      d.setMag(this.speed);
+
+      this.pos.add(d);
+
+      if (i === this.schedule.length) {
+        this.add_posis();
+      }
+    }
+  }
+  add_posis() {
+    this.other_destinations.push({ x: random(0, width), y: random(0, height) });
   }
   constrain() {
     if (this.pos.x < 0 || this.pos.x > width) {
@@ -85,6 +153,7 @@ class Being {
       this.vel.y *= -1;
     }
   }
+  age() {}
   static death() {}
 }
 
