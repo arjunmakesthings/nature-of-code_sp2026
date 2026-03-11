@@ -55,8 +55,12 @@ class World {
 
     let hour = this.time[1];
 
-    if (this.prev_hour > hour) {
-      this.beings.push(Being.birth(random(width), random(height)));
+    if (this.prev_hour != hour) {
+      let n = Math.floor(random(0, 2));
+
+      for (let i = 0; i < n; ++i) {
+        this.beings.push(Being.birth(random(width), random(height)));
+      }
     }
 
     this.prev_hour = hour;
@@ -160,7 +164,7 @@ class Being {
     noFill();
     let c = map(this.curr_age, 0, 80, 255, 50);
     stroke(c);
-    circle(this.pos.x, this.pos.y, 20);
+    circle(this.pos.x, this.pos.y, this.mass);
   }
 
   move(t) {
@@ -220,14 +224,17 @@ class Being {
 
     this.dying_rate += abs(noise(frameCount) * 0.00005); //dying rate keeps changing between 0,1.
 
-    // console.log(this.curr_age);
+    this.mass += this.curr_age * 0.005;
+    this.mass = constrain(this.mass, 1, 20);
   }
   die() {
-    //as beings get older, their probability to die increases. 
+    //as beings get older, their probability to die increases.
     this.prob_to_die = this.curr_age * 0.00005;
 
-    //probability can never exceed 1. 
+    //probability can never exceed 1.
     this.prob_to_die = constrain(this.prob_to_die, 0, 1);
+
+    this.mass -= this.prob_to_die;
 
     let n = random();
 
