@@ -103,11 +103,11 @@ class Being {
     //they have a dying rate.
     this.dying_rate = 0;
 
-    //they have a mass.
-    this.mass = 1;
-
     //they have the probability to die.
     this.prob_to_die = 0;
+
+    //they have a mass.
+    this.mass = 1;
 
     //they move at different speeds.
     this.speed = random(0, 2);
