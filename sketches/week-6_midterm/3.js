@@ -47,11 +47,11 @@ class World {
       // let x = width / 2;
       // let y = height / 2;
       // this.beings.push(Being.birth(x, y));
-      this.beings.push(Being.birth(random(width), random(height)));
+      // this.beings.push(Being.birth(random(width), random(height)));
     }
-    // let x = width / 2;
-    // let y = height / 2;
-    // this.beings.push(Being.birth(x, y));
+    let x = width / 2;
+    let y = height / 2;
+    this.beings.push(Being.birth(x, y));
   }
   run() {
     background(0);
@@ -59,21 +59,23 @@ class World {
 
     let hour = this.time[1];
 
-    //birth; 
-    if (this.prev_hour != hour) {
-      let n = Math.floor(random(0, 20));
-      for (let i = 0; i < n; ++i) {
-        this.beings.push(Being.birth(random(width), random(height)));
-      }
-    }
+    // //birth;
+    // if (this.prev_hour != hour) {
+    //   let n = Math.floor(random(0, 20));
+    //   for (let i = 0; i < n; ++i) {
+    //     this.beings.push(Being.birth(random(width), random(height)));
+    //   }
+    // }
     this.prev_hour = hour;
 
-    //death; 
-    for (let i = this.beings.length - 1; i >= 0; i--) {
-      let being = this.beings[i];
-      being.live(this.time);
-      if (!being.alive) this.beings.splice(i, 1);
-    }
+    // //death;
+    // for (let i = this.beings.length - 1; i >= 0; i--) {
+    //   let being = this.beings[i];
+    //   being.live(this.time);
+    //   if (!being.alive) this.beings.splice(i, 1);
+    // }
+
+    this.beings[0].live(this.time);
 
     noStroke();
     fill(255);
@@ -160,10 +162,10 @@ class Being {
   }
 
   show() {
-    noFill(); 
+    noFill();
     let c = map(this.curr_age, 0, 80, 255, 50);
     stroke(c);
-    circle(this.pos.x, this.pos.y, this.mass);
+    circle(this.pos.x, this.pos.y, 20);
   }
 
   move(t) {
