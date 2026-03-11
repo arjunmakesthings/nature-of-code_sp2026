@@ -40,7 +40,7 @@ class World {
     //helpers for calculations:
     this.prev_hour = -1;
 
-    this.polyGroups = [];
+    this.poly_groups = [];
   }
   big_bang() {
     for (let i = 0; i < 200; i++) {
@@ -78,61 +78,83 @@ class World {
     this.interpret();
   }
   interpret() {
-    // -- POLYGON DETECTION AND SMOOTHING
-    let threshold = 50;
-    let newGroups = [];
-    let visited = new Set();
+    /*
+    interpretation 1:
+    beings are grouped together at birth, based on the proximity of being born next to other beings. 
+    */
+
+    let dist_thresh = 50; //distance to consider two beings part of the same group.
+    let groups = []; //store groups.
+    let visited = new Set(); //to track if already grouped.
 
     for (let i = 0; i < this.beings.length; i++) {
-      if (visited.has(i)) continue;
+      // if (visited.has(i)) continue; //if already in a group, you can't be part of another group.
 
+      //find neighbours for grouping:
       let neighbors = [this.beings[i]];
+
       for (let j = i + 1; j < this.beings.length; j++) {
         let d = p5.Vector.dist(this.beings[i].pos, this.beings[j].pos);
-        if (d < threshold) neighbors.push(this.beings[j]);
+        if (d < dist_thresh) neighbors.push(this.beings[j]);
       }
 
-      if (neighbors.length > 2) {
+      //a group is more than 1 being.
+      if (neighbors.length > 1) {
         neighbors.forEach((b) => visited.add(this.beings.indexOf(b)));
 
-        // compute centroid
-        let cx = neighbors.reduce((sum, b) => sum + b.pos.x, 0) / neighbors.length;
-        let cy = neighbors.reduce((sum, b) => sum + b.pos.y, 0) / neighbors.length;
+        //check whether members are dead or alive.
+        let living_members = neighbors.filter((b) => b.alive);
+        let all_dead = living_members.length === 0;
 
-        // sort neighbors by angle
-        neighbors.sort((a, b) => atan2(a.pos.y - cy, a.pos.x - cx) - atan2(b.pos.y - cy, b.pos.x - cx));
+        //skip group, if some members are dead but not all.
+        if (!all_dead && living_members.length < neighbors.length) continue;
 
-        // smooth positions
-        neighbors.forEach((b) => {
+        //use all members for centroid & sorting (either all living or all dead).
+        let members_to_process = all_dead ? neighbors : living_members;
+
+        //find centroid for smoothening.
+        let cx = members_to_process.reduce((sum, b) => sum + b.pos.x, 0) / members_to_process.length;
+        let cy = members_to_process.reduce((sum, b) => sum + b.pos.y, 0) / members_to_process.length;
+
+        //sort neighbors by angle around centroid.
+        members_to_process.sort((a, b) => atan2(a.pos.y - cy, a.pos.x - cx) - atan2(b.pos.y - cy, b.pos.x - cx));
+
+        //smooth positions using lerp for nicer visual transitions.
+        members_to_process.forEach((b) => {
           if (!b.displayPos) b.displayPos = b.pos.copy();
-          b.displayPos.lerp(b.pos, 0.1); // slower lerp for smoother motion
+          b.displayPos.lerp(b.pos, 0.1);
         });
 
-        // compute average age for fade-in opacity
-        let avg_age = neighbors.reduce((sum, b) => sum + b.curr_age, 0) / neighbors.length;
+        //compute average age to determine opacity
+        let avg_age = members_to_process.reduce((sum, b) => sum + b.curr_age, 0) / members_to_process.length;
+
+        //map age to opacity. same as in beings.show(). 
         let opacity = map(avg_age, 0, 80, 0, 255);
 
-        // store polygon group for smoother transitions
-        newGroups.push({ neighbors, opacity });
+        //store group, also store if all members are dead.
+        groups.push({ neighbors: members_to_process, opacity, allDead: all_dead });
       }
     }
 
-    // -- DRAW POLYGONS WITH FADE
-    this.polyGroups.forEach((g) => {
-      fill(255, 255, 255, g.opacity * 0.5); // white polygons with age-based opacity
+    //now for each polygon, we draw a group:
+    this.poly_groups.forEach((g) => {
+      if (g.allDead) {
+        fill(0, 0, 0, 255); //black polygons for fully dead groups.
+      } else {
+        fill(255, 255, 255, g.opacity * 0.5); // white polygons for alive groups. 
+      }
+      // noFill();
+
+      stroke (0); 
       beginShape();
       let pts = g.neighbors.map((b) => b.displayPos);
-      pts.push(pts[0]); // repeat first point at end
-      pts.unshift(pts[pts.length - 2]); // repeat last actual point at start
+      pts.push(pts[0]); // close polygon
       pts.forEach((p) => curveVertex(p.x, p.y));
       endShape(CLOSE);
-
-      // fade old polygons gradually
-      g.opacity = lerp(g.opacity, 0, 0.01);
     });
 
-    // update polyGroups with newly detected groups
-    this.polyGroups = newGroups;
+    //update poly_groups to the new set. 
+    this.poly_groups = groups;
   }
 }
 
