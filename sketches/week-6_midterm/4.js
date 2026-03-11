@@ -66,7 +66,7 @@ class World {
     this.prev_hour = hour;
 
     noStroke();
-    fill(255, 0, 0);
+    fill (255); 
 
     text("hour: " + this.time[1], 50, 50);
 
@@ -275,9 +275,8 @@ class Being {
       }
 
       show() {
-        noFill();
-        let c = map(this.curr_age, 0, 80, 255, 50);
-        stroke(c);
+        let c = map(this.prob_to_die, 0, 1, 255, 10);
+        fill (c); 
         circle(this.pos.x, this.pos.y, this.mass);
       }
 
@@ -430,7 +429,7 @@ class Being {
 
   show() {
     noFill();
-    let c = map(this.prob_to_die, 0, 1, 255, 10);
+    let c = map(this.curr_age, 0, 80, 255, 50);
     stroke(c);
     circle(this.pos.x, this.pos.y, this.mass);
   }
