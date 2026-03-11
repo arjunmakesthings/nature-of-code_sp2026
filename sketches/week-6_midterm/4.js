@@ -59,7 +59,7 @@ class World {
 
     let hour = this.time[1];
 
-    // spawn new beings every hour
+    //birth:
     if (this.prev_hour != hour) {
       let n = Math.floor(random(0, 20));
       for (let i = 0; i < n; ++i) {
@@ -68,18 +68,16 @@ class World {
     }
     this.prev_hour = hour;
 
-    noStroke();
-    fill(255);
-
-    text("hour: " + this.time[1], 50, 50);
-
-    // -- LIVE AND DIE
+    //death:
     for (let i = this.beings.length - 1; i >= 0; i--) {
       let being = this.beings[i];
       being.live(this.time);
       if (!being.alive) this.beings.splice(i, 1);
     }
 
+    this.interpret();
+  }
+  interpret() {
     // -- POLYGON DETECTION AND SMOOTHING
     let threshold = 50;
     let newGroups = [];
