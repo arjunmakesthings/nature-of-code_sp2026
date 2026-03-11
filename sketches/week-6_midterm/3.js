@@ -36,19 +36,18 @@ class World {
 
     this.time = 0;
 
-    //helpers for calculations: 
+    //helpers for calculations:
     this.prev_hour = -1;
   }
   big_bang() {
-
-    for (let i = 0; i<200; i++){
-      let x = width / 2;
-      let y = height / 2;
-      this.beings.push(Being.birth(x, y));
-    }
-    // let x = width / 2;
-    // let y = height / 2;
-    // this.beings.push(Being.birth(x, y));
+    // for (let i = 0; i<200; i++){
+    //   let x = width / 2;
+    //   let y = height / 2;
+    //   this.beings.push(Being.birth(x, y));
+    // }
+    let x = width / 2;
+    let y = height / 2;
+    this.beings.push(Being.birth(x, y));
   }
   run() {
     background(0);
@@ -67,7 +66,7 @@ class World {
 
     text("hour: " + this.time[1], 50, 50);
 
-    //go backwards to not break the loop. 
+    //go backwards to not break the loop.
     for (let i = this.beings.length - 1; i >= 0; i--) {
       let being = this.beings[i];
 
@@ -102,6 +101,9 @@ class Being {
 
     //they have a mass.
     this.mass = 1;
+
+    //they have the probability to die.
+    this.prob_to_die = 0;
 
     //they move at different speeds.
     this.speed = random(0, 2);
@@ -156,7 +158,8 @@ class Being {
 
   show() {
     noFill();
-    stroke(255);
+    let c = map(this.curr_age, 0, 80, 255, 50);
+    stroke(c);
     circle(this.pos.x, this.pos.y, 20);
   }
 
@@ -216,17 +219,19 @@ class Being {
     this.curr_age += this.dying_rate;
 
     this.dying_rate += abs(noise(frameCount) * 0.00005); //dying rate keeps changing between 0,1.
+
+    // console.log(this.curr_age);
   }
   die() {
-    // base death probability per second
-    let p_per_second = this.curr_age * 0.001;
+    //as beings get older, their probability to die increases. 
+    this.prob_to_die = this.curr_age * 0.00005;
 
-    // convert to per-frame probability
-    let prob_to_die = p_per_second * (deltaTime / 1000);
+    //probability can never exceed 1. 
+    this.prob_to_die = constrain(this.prob_to_die, 0, 1);
 
-    prob_to_die = constrain(prob_to_die, 0, 1);
+    let n = random();
 
-    if (random() < prob_to_die) {
+    if (n < this.prob_to_die) {
       this.alive = false;
     }
   }
