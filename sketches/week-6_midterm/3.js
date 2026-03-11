@@ -35,45 +35,85 @@ class World {
     this.beings = [];
 
     this.time = 0;
+
+    //helpers for calculations: 
+    this.prev_hour = -1;
   }
   big_bang() {
-    let x = width / 2;
-    let y = height / 2;
-    this.beings.push(Being.birth(x, y));
+
+    for (let i = 0; i<200; i++){
+      let x = width / 2;
+      let y = height / 2;
+      this.beings.push(Being.birth(x, y));
+    }
+    // let x = width / 2;
+    // let y = height / 2;
+    // this.beings.push(Being.birth(x, y));
   }
   run() {
     background(0);
     this.time = keep_time();
+
+    let hour = this.time[1];
+
+    if (this.prev_hour > hour) {
+      this.beings.push(Being.birth(random(width), random(height)));
+    }
+
+    this.prev_hour = hour;
 
     noStroke();
     fill(255, 0, 0);
 
     text("hour: " + this.time[1], 50, 50);
 
-    for (let being of this.beings) {
+    //go backwards to not break the loop. 
+    for (let i = this.beings.length - 1; i >= 0; i--) {
+      let being = this.beings[i];
+
       being.live(this.time);
+
+      if (!being.alive) {
+        this.beings.splice(i, 1);
+      }
     }
   }
 }
 
 class Being {
   constructor(x, y) {
+    //beings have positions in space.
     this.pos = createVector(x, y);
     this.vel = createVector(3, 0);
 
-    //beings have houses, and other destinations that they frequent.
-    this.house = this.pos.copy();
+    //they have houses, and other destinations that they frequent.
+    this.home = this.pos.copy();
     this.other_destinations = [];
+    this.other_destinations.push({ x: this.home.x, y: this.home.y }); //the first position in other destinations is always home.
 
-    this.other_destinations.push({ x: this.pos.x, y: this.pos.y });
-
-    this.other_destinations.push({ x: random(0, width), y: random(0, height) });
-
+    //they live by a schedule.
     this.schedule = this.make_schedule();
 
-    this.new_pos = createVector(0, 0);
+    //they have a current-age.
+    this.curr_age = 0;
 
-    this.speed = random(2); //everyone moves at different speeds.
+    //they have a dying rate.
+    this.dying_rate = 0;
+
+    //they have a mass.
+    this.mass = 1;
+
+    //they move at different speeds.
+    this.speed = random(0, 2);
+
+    this.alive = true;
+
+    //helper variables to do calculations.
+    this.current_hour = -1; //remember last hour to prevent jittering.
+    this.new_pos = createVector(x, y);
+
+    //helper allocations:
+    this.other_destinations.push({ x: random(0, width), y: random(0, height) });
   }
 
   //constructor helper to make a schedule:
@@ -102,49 +142,67 @@ class Being {
 
     return schedule;
   }
+
   static birth(x, y) {
     return new Being(x, y);
   }
+
   live(t) {
     this.show();
     this.move(t);
+    this.age();
+    this.die();
   }
+
   show() {
     noFill();
     stroke(255);
     circle(this.pos.x, this.pos.y, 20);
   }
+
   move(t) {
     this.constrain();
 
     //t[0] comes as a 24 second loop.
+    let hour = t[1];
 
-    for (let i = 0; i < this.schedule.length; i++) {
-      if (i !== t[1]) continue; //if we're not checking against the current time, we don't care.
+    //only pick a new destination when the hour changes
+    if (hour !== this.current_hour) {
+      this.current_hour = hour;
 
-      //if i is the current time:
+      for (let i = 0; i < this.schedule.length; i++) {
+        if (i !== hour) continue; //if we're not checking against the current time, we don't care.
 
-      if (i % 2 == 0) {
-        //starting number of a pair.
-        let n = Math.floor(random(this.other_destinations.length));
-        this.new_pos.set(this.other_destinations[n].x, this.other_destinations[n].y);
-      } else {
-        //ending number of a pair.
-      }
+        //if i is the current time:
+        if (i % 2 == 0) {
+          //starting number of a pair.
+          let n = Math.floor(random(this.other_destinations.length));
+          this.new_pos.set(this.other_destinations[n].x, this.other_destinations[n].y);
+        } else {
+          //ending number of a pair.
+        }
 
-      let d = p5.Vector.sub(this.new_pos, this.pos);
-      d.setMag(this.speed);
-
-      this.pos.add(d);
-
-      if (i === this.schedule.length) {
-        this.add_posis();
+        if (i === this.schedule.length - 1) {
+          this.add_posis();
+        }
       }
     }
+
+    //move toward the chosen destination every frame
+    let d = p5.Vector.sub(this.new_pos, this.pos);
+
+    if (d.mag() > this.speed) {
+      d.setMag(this.speed);
+      this.pos.add(d);
+    } else {
+      this.pos = this.new_pos.copy();
+    }
   }
+
   add_posis() {
     this.other_destinations.push({ x: random(0, width), y: random(0, height) });
   }
+
   constrain() {
     if (this.pos.x < 0 || this.pos.x > width) {
       this.vel.x *= -1;
@@ -153,8 +211,25 @@ class Being {
       this.vel.y *= -1;
     }
   }
-  age() {}
-  static death() {}
+
+  age() {
+    this.curr_age += this.dying_rate;
+
+    this.dying_rate += abs(noise(frameCount) * 0.00005); //dying rate keeps changing between 0,1.
+  }
+  die() {
+    // base death probability per second
+    let p_per_second = this.curr_age * 0.001;
+
+    // convert to per-frame probability
+    let prob_to_die = p_per_second * (deltaTime / 1000);
+
+    prob_to_die = constrain(prob_to_die, 0, 1);
+
+    if (random() < prob_to_die) {
+      this.alive = false;
+    }
+  }
 }
 
 //helper to keep time.
