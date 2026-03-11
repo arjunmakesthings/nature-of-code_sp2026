@@ -22,6 +22,8 @@ function setup() {
 
   world = new World(0, 0);
   world.big_bang();
+
+  background(0);
 }
 function draw() {
   world.run();
@@ -40,14 +42,15 @@ class World {
     this.prev_hour = -1;
   }
   big_bang() {
-    // for (let i = 0; i<200; i++){
-    //   let x = width / 2;
-    //   let y = height / 2;
-    //   this.beings.push(Being.birth(x, y));
-    // }
-    let x = width / 2;
-    let y = height / 2;
-    this.beings.push(Being.birth(x, y));
+    for (let i = 0; i<200; i++){
+      // let x = width / 2;
+      // let y = height / 2;
+      // this.beings.push(Being.birth(x, y));
+      this.beings.push(Being.birth(random(width), random(height)));
+    }
+    // let x = width / 2;
+    // let y = height / 2;
+    // this.beings.push(Being.birth(x, y));
   }
   run() {
     background(0);
@@ -56,7 +59,7 @@ class World {
     let hour = this.time[1];
 
     if (this.prev_hour != hour) {
-      let n = Math.floor(random(0, 2));
+      let n = Math.floor(random(0, 20));
 
       for (let i = 0; i < n; ++i) {
         this.beings.push(Being.birth(random(width), random(height)));
@@ -276,7 +279,7 @@ class Being {
 
       show() {
         let c = map(this.prob_to_die, 0, 1, 255, 10);
-        fill (c); 
+        fill (255); 
         circle(this.pos.x, this.pos.y, this.mass);
       }
 
@@ -428,9 +431,8 @@ class Being {
   }
 
   show() {
-    noFill();
     let c = map(this.curr_age, 0, 80, 255, 50);
-    stroke(c);
+    fill(c);
     circle(this.pos.x, this.pos.y, this.mass);
   }
 
@@ -496,7 +498,7 @@ class Being {
   }
   die() {
     //as beings get older, their probability to die increases.
-    this.prob_to_die = this.curr_age * 0.00005;
+    this.prob_to_die = this.curr_age * 0.00002;
 
     //probability can never exceed 1.
     this.prob_to_die = constrain(this.prob_to_die, 0, 1);
