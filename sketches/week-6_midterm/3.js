@@ -43,15 +43,12 @@ class World {
     this.polyGroups = [];
   }
   big_bang() {
-    for (let i = 0; i < 200; i++) {
-      // let x = width / 2;
-      // let y = height / 2;
-      // this.beings.push(Being.birth(x, y));
-      // this.beings.push(Being.birth(random(width), random(height)));
+    for (let i = 0; i < 50; i++) {
+      this.beings.push(Being.birth(random(width), random(height)));
     }
-    let x = width / 2;
-    let y = height / 2;
-    this.beings.push(Being.birth(x, y));
+    // let x = width / 2;
+    // let y = height / 2;
+    // this.beings.push(Being.birth(x, y));
   }
   run() {
     background(0);
@@ -75,7 +72,11 @@ class World {
     //   if (!being.alive) this.beings.splice(i, 1);
     // }
 
-    this.beings[0].live(this.time);
+    for (let i = 0; i<this.beings.length; i++){
+      this.beings[i].live(this.time);
+    }; 
+
+    
 
     noStroke();
     fill(255);
