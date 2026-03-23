@@ -113,11 +113,19 @@ class World {
         let members_to_process = all_dead ? neighbors : living_members;
 
         //find centroid for smoothening.
-        let cx = members_to_process.reduce((sum, b) => sum + b.pos.x, 0) / members_to_process.length;
-        let cy = members_to_process.reduce((sum, b) => sum + b.pos.y, 0) / members_to_process.length;
+        let cx =
+          members_to_process.reduce((sum, b) => sum + b.pos.x, 0) /
+          members_to_process.length;
+        let cy =
+          members_to_process.reduce((sum, b) => sum + b.pos.y, 0) /
+          members_to_process.length;
 
         //sort neighbors by angle around centroid.
-        members_to_process.sort((a, b) => atan2(a.pos.y - cy, a.pos.x - cx) - atan2(b.pos.y - cy, b.pos.x - cx));
+        members_to_process.sort(
+          (a, b) =>
+            atan2(a.pos.y - cy, a.pos.x - cx) -
+            atan2(b.pos.y - cy, b.pos.x - cx),
+        );
 
         //smooth positions using lerp for nicer visual transitions.
         members_to_process.forEach((b) => {
@@ -126,13 +134,19 @@ class World {
         });
 
         //compute average age to determine opacity
-        let avg_age = members_to_process.reduce((sum, b) => sum + b.curr_age, 0) / members_to_process.length;
+        let avg_age =
+          members_to_process.reduce((sum, b) => sum + b.curr_age, 0) /
+          members_to_process.length;
 
-        //map age to opacity. same as in beings.show(). 
+        //map age to opacity. same as in beings.show().
         let opacity = map(avg_age, 0, 80, 0, 255);
 
         //store group, also store if all members are dead.
-        groups.push({ neighbors: members_to_process, opacity, allDead: all_dead });
+        groups.push({
+          neighbors: members_to_process,
+          opacity,
+          allDead: all_dead,
+        });
       }
     }
 
@@ -141,11 +155,11 @@ class World {
       if (g.allDead) {
         fill(0, 0, 0, 255); //black polygons for fully dead groups.
       } else {
-        fill(255, 255, 255, g.opacity * 0.5); // white polygons for alive groups. 
+        fill(255, 255, 255, g.opacity * 0.5); // white polygons for alive groups.
       }
       // noFill();
 
-      stroke (0); 
+      stroke(0);
       beginShape();
       let pts = g.neighbors.map((b) => b.displayPos);
       pts.push(pts[0]); // close polygon
@@ -153,7 +167,7 @@ class World {
       endShape(CLOSE);
     });
 
-    //update poly_groups to the new set. 
+    //update poly_groups to the new set.
     this.poly_groups = groups;
   }
 }
@@ -258,7 +272,10 @@ class Being {
         if (i % 2 == 0) {
           //starting number of a pair.
           let n = Math.floor(random(this.other_destinations.length));
-          this.new_pos.set(this.other_destinations[n].x, this.other_destinations[n].y);
+          this.new_pos.set(
+            this.other_destinations[n].x,
+            this.other_destinations[n].y,
+          );
         }
 
         if (i === this.schedule.length - 1) {
