@@ -1,1 +1,1 @@
-further work on this is moved to its own repository. 
+further work on this is moved to its own [repository](https://github.com/arjunmakesthings/emergence_wip). 
