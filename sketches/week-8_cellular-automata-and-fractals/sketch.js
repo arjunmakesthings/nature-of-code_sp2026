@@ -1,25 +1,22 @@
-//untitled; arjun; month, 2026.
-
 /*
-ask: 
+basic ping-pong template for p5.js, to handle gpu-computing. see README.md for notes. 
 
+by arjun; 260329. thanks to elias (elie) zananiri for his shader-time class at itp in sp-2026. 
 */
 
-/*
-thought: 
-
-*/
-
-//shader files:
+//shader variables:
 let main_shader;
 let compute_1, compute_2;
 
-//graphic buffers:
+//graphic (off-screen) buffers:
 let buffer_1, buffer_2;
 
-let m_coords = [-1000, -1000]; //off-screen.
-
+//switch to ping-pong.
 let tog = false;
+
+//to pass to compute-shader:
+let mouse_was_clicked = 0.0;
+let m_coords = [0.0, 0.0];
 
 function preload() {
   main_shader = loadShader("./vert.vert", "./frag.frag");
@@ -29,7 +26,7 @@ function preload() {
 }
 
 function setup() {
-  // createCanvas(1000, 562); //in 16:9 aspect ratio.
+  // createCanvas(1000, 562, WEBGL); //in 16:9 aspect ratio.
   createCanvas(800, 800, WEBGL); //square to handle calculations better.
   pixelDensity(1);
   noStroke();
@@ -42,23 +39,20 @@ function setup() {
   buffer_1.noStroke();
   buffer_2.noStroke();
 
-  buffer_1.background(0); 
-  buffer_2.background(0); 
+  //start with a default black background.
+  buffer_1.background(0);
+  buffer_2.background(0);
 }
 
 function draw() {
   if (tog) {
     buffer_1.shader(compute_1);
-    compute_1.setUniform("u_prev", buffer_2);
-    compute_1.setUniform("u_mouse", m_coords);
-    compute_1.setUniform("u_res", [width, height]);
-    buffer_1.rect(-width / 2, -height / 2, width, height);
+    set_uniforms(compute_1, buffer_2);
+    buffer_1.rect(0, 0, width, height);
   } else {
     buffer_2.shader(compute_2);
-    compute_2.setUniform("u_prev", buffer_1);
-    compute_2.setUniform("u_mouse", m_coords);
-    compute_2.setUniform("u_res", [width, height]);
-    buffer_2.rect(-width / 2, -height / 2, width, height);
+    set_uniforms(compute_2, buffer_1);
+    buffer_2.rect(0, 0, width, height);
   }
 
   let current = tog ? buffer_1 : buffer_2;
@@ -70,13 +64,23 @@ function draw() {
   shader(main_shader);
   main_shader.setUniform("u_map", current);
   main_shader.setUniform("u_res", [width, height]);
-  rect(-width / 2, -height / 2, width, height);
+  rect(0, 0, width, height);
 
+  //reverse the switch. 
   tog = !tog;
+
+  mouse_was_clicked = 0.0;
 }
 
 function mousePressed() {
-  m_coords = [mouseX, mouseY];
+  mouse_was_clicked = 1.0;
+  m_coords = [mouseX * 1.0, mouseY * 1.0]; //pass as float.
 }
 
 /* helpers */
+function set_uniforms(shader_name, prev_buffer) {
+  shader_name.setUniform("u_prev", prev_buffer);
+  shader_name.setUniform("u_mouse", m_coords);
+  shader_name.setUniform("u_mouse_was_clicked", mouse_was_clicked);
+  shader_name.setUniform("u_res", [width, height]);
+}

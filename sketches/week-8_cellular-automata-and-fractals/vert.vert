@@ -2,27 +2,30 @@
 precision mediump float;
 #endif
 
-// Built-in transformation matrices.
+//built-in uniforms:
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelViewMatrix;
 
-// Mesh attributes.
+//built in attributes (from p5): 
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 
-// Custom uniforms.
+//custom uniforms: 
 uniform vec2 u_res;
 
-// Passed attributes.
+//to pass vertex-attributes to the fragment shader: 
 varying vec2 vTexCoord;
 
 void main() {
-  // Copy the vec3 position into a vec4.
-    vec4 position = vec4(aPosition, 1.0);
+  //make vec3 vec4 for calculations:
+  vec4 position = vec4(aPosition, 1.0);
 
-  // Set the clip space position.
-    gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+  //translate:
+  position.xy -= 0.5; 
 
-  // Pass data to the fragment shader.
-    vTexCoord = aTexCoord;
+  //mvp: 
+  gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+
+  //pass to fragment shader:
+  vTexCoord = aTexCoord;
 }
