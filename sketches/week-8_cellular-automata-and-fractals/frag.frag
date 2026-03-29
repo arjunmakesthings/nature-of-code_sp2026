@@ -14,9 +14,9 @@ float self = 0.0;
 
 void main() {
     //read from texture.
-    self = texture2D(u_map, vTexCoord).r;
+    vec4 receival = texture2D(u_map, vTexCoord);
 
-    gl_FragColor = vec4(self, 0.0, 0.0, 1.0); 
+    gl_FragColor = vec4(receival.r, 0.0, 0.0, 1.0); 
 
     //for testing:
     // gl_FragColor = vec4(vTexCoord.x, 0.0,0.0,1.0);

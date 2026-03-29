@@ -15,8 +15,11 @@ let buffer_1, buffer_2;
 let tog = false;
 
 //to pass to compute-shader:
-let mouse_was_clicked = 0.0;
-let m_coords = [0.0, 0.0];
+let seed_coords = [-1000, 1000]; //draw to off screen at first.
+
+let inject_toggle = 0.0;
+
+let margin = 100;
 
 function preload() {
   main_shader = loadShader("./vert.vert", "./frag.frag");
@@ -42,11 +45,21 @@ function setup() {
   //start with a default black background.
   buffer_1.background(0);
   buffer_2.background(0);
+
+  seed_coords = [width / 2, height / 2];
+  inject_toggle = 1.0;
 }
 
 function draw() {
-  //random seed: 
-  
+  //random seed:
+  // if (frameCount % 60 === 0) {
+  //   //every 3 seconds:
+  //   seed_coords = [
+  //     Math.floor(random(margin, width - margin)),
+  //     Math.floor(random(margin, height - margin)),
+  //   ];
+  // }
+
   if (tog) {
     buffer_1.shader(compute_1);
     set_uniforms(compute_1, buffer_2);
@@ -68,21 +81,21 @@ function draw() {
   main_shader.setUniform("u_res", [width, height]);
   rect(0, 0, width, height);
 
-  //reverse the switch. 
+  //reverse the switch.
   tog = !tog;
 
-  mouse_was_clicked = 0.0;
-}
-
-function mousePressed() {
-  mouse_was_clicked = 1.0;
-  m_coords = [mouseX * 1.0, mouseY * 1.0]; //pass as float.
+  if (frameCount > 1) {
+    inject_toggle = 0.0;
+  }
 }
 
 /* helpers */
 function set_uniforms(shader_name, prev_buffer) {
   shader_name.setUniform("u_prev", prev_buffer);
-  shader_name.setUniform("u_mouse", m_coords);
-  shader_name.setUniform("u_mouse_was_clicked", mouse_was_clicked);
-  shader_name.setUniform("u_res", [width, height]);
+  shader_name.setUniform("u_res", [width * 1.0, height * 1.0]);
+  shader_name.setUniform("u_inject_toggle", inject_toggle);
+  shader_name.setUniform("u_seed_coords", [
+    seed_coords[0] * 1.0,
+    seed_coords[1] * 1.0,
+  ]);
 }
