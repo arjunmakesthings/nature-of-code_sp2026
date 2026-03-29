@@ -41,6 +41,9 @@ function setup() {
   buffer_2.pixelDensity(1);
   buffer_1.noStroke();
   buffer_2.noStroke();
+
+  buffer_1.background(0); 
+  buffer_2.background(0); 
 }
 
 function draw() {
@@ -59,6 +62,10 @@ function draw() {
   }
 
   let current = tog ? buffer_1 : buffer_2;
+
+  //test to see ping pong (you should see flashing lights):
+  // buffer_1.background(255, 0, 0);
+  // buffer_2.background(0, 0, 255);
 
   shader(main_shader);
   main_shader.setUniform("u_map", current);

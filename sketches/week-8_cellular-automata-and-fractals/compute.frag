@@ -2,16 +2,27 @@
 precision mediump float;
 #endif
 
-// Passed attributes.
 varying vec2 vTexCoord;
 
-// Custom uniforms.
-uniform sampler2D u_tex;
+uniform vec2 u_res;
+uniform sampler2D u_prev;
+uniform vec2 u_mouse;
 
 void main() {
-    vec4 texColor = texture2D(u_tex, vTexCoord);
+    // sample previous frame
+    vec4 prev = texture2D(u_prev, vTexCoord);
 
-    // texColor.b *= sin(u_time + vTexCoord.x / 0.05);
-    gl_FragColor = texColor;
-    // gl_FragColor.a = 0.7;
+    // convert UV → pixel coords (to match mouse)
+    vec2 fragCoord = vTexCoord * u_res;
+
+    float d = distance(fragCoord, u_mouse);
+
+    vec4 color = prev;
+
+    // inject white where mouse is
+    if(d < 20.0) {
+        color = vec4(1.0);
+    }
+
+    gl_FragColor = color;
 }
