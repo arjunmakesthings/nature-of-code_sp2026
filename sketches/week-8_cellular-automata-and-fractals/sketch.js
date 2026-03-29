@@ -45,6 +45,8 @@ function setup() {
 }
 
 function draw() {
+  //random seed: 
+  
   if (tog) {
     buffer_1.shader(compute_1);
     set_uniforms(compute_1, buffer_2);
