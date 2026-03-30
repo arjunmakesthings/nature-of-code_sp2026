@@ -54,12 +54,12 @@ function draw() {
   //random seed:
   if (frameCount % 60 === 0) {
     //every 3 seconds:
-    // seed_coords = [
-    //   Math.floor(random(margin, width - margin)),
-    //   Math.floor(random(margin, height - margin)),
-    // ];
-    // seed_coords = [width / 2, height / 2];
-    // inject_toggle = 1.0;
+    seed_coords = [
+      Math.floor(random(margin, width - margin)),
+      Math.floor(random(margin, height - margin)),
+    ];
+    seed_coords = [width / 2, height / 2];
+    inject_toggle = 1.0;
   }
 
   if (tog) {

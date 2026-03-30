@@ -61,7 +61,7 @@ void main() {
         if(d < 1.0) {
             inject();
         } else {
-            curr = prev.r;
+            // curr = prev.r;
         }
     } else {
         curr = prev.r;
@@ -83,15 +83,11 @@ void main() {
         curr -= give;
     } else if(curr < capacity) {
         //on the other hand, if your current value is less than your capacity, you seek:
-
         for(int i = 0; i < 8; i++) {
             float other_r = neighbours[i].r;
             float other_g = neighbours[i].g;
-
-            if(other_g > 0.0) {
-                //if they had something to give, take.
                 curr += other_g; 
-            }
+            
         }
     }
         //send out as rgba: 
