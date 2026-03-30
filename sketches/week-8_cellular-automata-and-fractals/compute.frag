@@ -11,6 +11,14 @@ uniform sampler2D u_prev;
 uniform vec2 u_seed_coords; //passed in pixel-space. 
 uniform float u_inject_toggle;
 
+//local: 
+float seed_amt = 1.0;
+float capacity = 0.5;
+
+float curr = 0.0;
+
+float give = 0.0; 
+
 //helpers: 
 
 //to get neighbours:
@@ -38,43 +46,40 @@ void main() {
     vec2 px_coord = vTexCoord * u_res; // use uniform resolution
 
     //previous state:
-    float prev = texture2D(u_prev, vTexCoord).r;
-
-    float curr = 0.0;
-
-    float give = 0.0; 
+    vec4 prev = texture2D(u_prev, vTexCoord);
 
     //inject seed: 
     if(u_inject_toggle == 1.0) {
         float d = distance(px_coord, u_seed_coords);
-        if(d < 20.0) {
-            curr = 1.0;
+        if(d < 100.0) {
+            curr = seed_amt;
         }
     } else {
         vec4 neighbours[8];
         get_neighbours(u_prev, vTexCoord, u_res, neighbours);
-        if(curr > 0.1) {
-            //you have something. give to your neighbours.
+        if(curr >= capacity) {
+            //you have more than you can take. share with neighbours.
+            float amt_to_offload = curr - capacity;
             for(int i = 0; i < 8; i++) {
                 float n = neighbours[i].r;
-
-                if(n < 1.0) {
-                    give += curr / 8.0;
+                if(n < capacity) {
+                    give += amt_to_offload;
                 }
             }
-        } else {
-            //take from neighbours. 
+        } else if(curr < capacity) {
+            //you are needy. take from neighbours. 
 
             for(int i = 0; i < 8; i++) {
                 float n = neighbours[i].r;
-
-                if(n > 0.1) {
-                    curr += n / 8.0;
+                if(n > capacity) {
+                    //this means it has something to give.
+                    curr += n / 7.0;
                 }
             }
-
+            // curr -= prev.g;
         }
+
     }
 
-    gl_FragColor = vec4(curr, give, 0.0, 1.0);
+    gl_FragColor = vec4(curr, prev.r, 0.0, 1.0);
 }
