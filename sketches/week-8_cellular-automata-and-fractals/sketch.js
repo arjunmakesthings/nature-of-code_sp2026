@@ -58,6 +58,7 @@ function draw() {
   //     Math.floor(random(margin, width - margin)),
   //     Math.floor(random(margin, height - margin)),
   //   ];
+  //   inject_toggle = 1.0;
   // }
 
   if (tog) {

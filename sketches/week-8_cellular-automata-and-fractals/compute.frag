@@ -9,12 +9,17 @@ varying vec2 vTexCoord;
 uniform vec2 u_res;
 uniform sampler2D u_prev;
 uniform vec2 u_seed_coords; //passed in pixel-space. 
-uniform float u_inject_toggle; 
-
-//parameters:
+uniform float u_inject_toggle;
 
 //helpers: 
+
 //to get neighbours:
+/* usage: 
+
+vec4 neighbours[8];
+get_neighbours(u_prev, vTexCoord, u_res, neighbours);
+
+*/
 void get_neighbours(sampler2D tex, vec2 uv, vec2 res, out vec4 neighbours[8]) {
     vec2 px = 1.0 / res;
 
@@ -29,55 +34,47 @@ void get_neighbours(sampler2D tex, vec2 uv, vec2 res, out vec4 neighbours[8]) {
 }
 
 void main() {
-    float curr_state = 0.0;
-    float prev_state = 0.0;
+    //globals: 
+    vec2 px_coord = vTexCoord * u_res; // use uniform resolution
+
+    //previous state:
+    float prev = texture2D(u_prev, vTexCoord).r;
+
+    float curr = 0.0;
 
     float give = 0.0; 
-    //globals:
-    vec2 px_coord = vTexCoord * u_res;
 
-    //local for calculations:
-    curr_state = texture2D(u_prev, vTexCoord).r;
-
-    //seed:
+    //inject seed: 
     if(u_inject_toggle == 1.0) {
         float d = distance(px_coord, u_seed_coords);
-
-        if(d < 1.0) {
-            curr_state = 1.0;
+        if(d < 20.0) {
+            curr = 1.0;
         }
+    } else {
+        vec4 neighbours[8];
+        get_neighbours(u_prev, vTexCoord, u_res, neighbours);
+        if(curr > 0.1) {
+            //you have something. give to your neighbours.
+            for(int i = 0; i < 8; i++) {
+                float n = neighbours[i].r;
 
+                if(n < 1.0) {
+                    give += curr / 8.0;
+                }
+            }
+        } else {
+            //take from neighbours. 
+
+            for(int i = 0; i < 8; i++) {
+                float n = neighbours[i].r;
+
+                if(n > 0.1) {
+                    curr += n / 8.0;
+                }
+            }
+
+        }
     }
 
-    vec4 neighbours[8];
-    get_neighbours(u_prev, vTexCoord, u_res, neighbours);
-
-    for(int i = 0; i < 8; i++) {
-        vec4 n = neighbours[i]; //channels are r,g,b,a.
-
-        if(n.r < curr_state) {
-            give += curr_state / 8.0;
-        }
-    }
-
-    curr_state -= give;
-
-    //receive: 
-    for(int i = 0; i < 8; i++) {
-        vec4 n = neighbours[i]; //channels are r,g,b,a.
-
-        if(n.g > 0.0) {
-            curr_state += n.g / 8.0;
-        }
-    }
-
-    //pass the thing:
-    gl_FragColor = vec4(curr_state, give, 0.0, 0.0);
+    gl_FragColor = vec4(curr, give, 0.0, 1.0);
 }
-
-/* usage: 
-
-vec4 neighbours[8];
-get_neighbours(u_prev, vTexCoord, u_res, neighbours);
-
-*/
