@@ -16,7 +16,7 @@ void main() {
     //read from texture.
     vec4 receival = texture2D(u_map, vTexCoord);
 
-    gl_FragColor = vec4(receival.g, 0.0, 0.0, 1.0); 
+    gl_FragColor = vec4(receival.r, receival.r, receival.r, 1.0); 
 
     //for testing:
     // gl_FragColor = vec4(vTexCoord.x, 0.0,0.0,1.0);

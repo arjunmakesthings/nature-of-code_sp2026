@@ -29,16 +29,20 @@ get_neighbours(u_prev, vTexCoord, u_res, neighbours);
 
 */
 void get_neighbours(sampler2D tex, vec2 uv, vec2 res, out vec4 neighbours[8]) {
+    // size of one pixel in UV space
     vec2 px = 1.0 / res;
 
-    neighbours[0] = texture2D(tex, uv + vec2(0.0, px.y));
-    neighbours[1] = texture2D(tex, uv + vec2(0.0, -px.y));
-    neighbours[2] = texture2D(tex, uv + vec2(-px.x, 0.0));
-    neighbours[3] = texture2D(tex, uv + vec2(px.x, 0.0));
-    neighbours[4] = texture2D(tex, uv + vec2(-px.x, px.y));
-    neighbours[5] = texture2D(tex, uv + vec2(px.x, px.y));
-    neighbours[6] = texture2D(tex, uv + vec2(-px.x, -px.y));
-    neighbours[7] = texture2D(tex, uv + vec2(px.x, -px.y));
+    // axis-aligned neighbors
+    neighbours[0] = texture2D(tex, uv + vec2(0.0, px.y));   // up
+    neighbours[1] = texture2D(tex, uv + vec2(0.0, -px.y));  // down
+    neighbours[2] = texture2D(tex, uv + vec2(-px.x, 0.0));  // left
+    neighbours[3] = texture2D(tex, uv + vec2(px.x, 0.0));   // right
+
+    // diagonal neighbors
+    neighbours[4] = texture2D(tex, uv + vec2(-px.x, px.y));  // up-left
+    neighbours[5] = texture2D(tex, uv + vec2(px.x, px.y));   // up-right
+    neighbours[6] = texture2D(tex, uv + vec2(-px.x, -px.y)); // down-left
+    neighbours[7] = texture2D(tex, uv + vec2(px.x, -px.y));  // down-right
 }
 
 void inject() {
@@ -54,8 +58,10 @@ void main() {
     //inject seed: 
     if(u_inject_toggle == 1.0) {
         float d = distance(px_coord, u_seed_coords);
-        if(d < 200.0) {
+        if(d < 1.0) {
             inject();
+        } else {
+            curr = prev.r;
         }
     } else {
         curr = prev.r;
@@ -84,10 +90,16 @@ void main() {
 
             if(other_g > 0.0) {
                 //if they had something to give, take.
-                curr += other_g;
+                curr += other_g; 
             }
         }
     }
         //send out as rgba: 
-    gl_FragColor = vec4(curr, give, 0.0, 1.0);
+    gl_FragColor = vec4(curr, give, u_inject_toggle, 1.0);
 }
+
+// for(int i = 0;
+// i < 8;
+// i ++) {
+// curr += neighbours[i].g * weights[i];
+// }
