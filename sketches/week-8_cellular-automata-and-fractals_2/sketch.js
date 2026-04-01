@@ -14,12 +14,7 @@ let buffer_1, buffer_2;
 //switch to ping-pong.
 let tog = false;
 
-//to pass to compute-shader:
-let seed_coords = [-1000, 1000]; //draw to off screen at first.
-
-let inject_toggle = 0.0;
-
-let margin = 100;
+let current_shader; //variable to store the current shader, to pass uniform-values later.
 
 function preload() {
   main_shader = loadShader("./vert.vert", "./frag.frag");
@@ -41,26 +36,10 @@ function setup() {
   buffer_2.pixelDensity(1);
   buffer_1.noStroke();
   buffer_2.noStroke();
-
-  //start with a default black background.
-  // buffer_1.background(0);
-  // buffer_2.background(0);
-
-  seed_coords = [width / 2, height / 2];
-  inject_toggle = 1.0;
 }
 
 function draw() {
-  //random seed:
-  if (frameCount % 60 === 0) {
-    //every 3 seconds:
-    // seed_coords = [
-    //   Math.floor(random(margin, width - margin)),
-    //   Math.floor(random(margin, height - margin)),
-    // ];
-    // seed_coords = [width / 2, height / 2];
-    // inject_toggle = 1.0;
-  }
+  current_shader = tog ? buffer_1 : buffer_2;
 
   if (tog) {
     buffer_1.shader(compute_1);
@@ -72,32 +51,23 @@ function draw() {
     buffer_2.rect(0, 0, width, height);
   }
 
-  let current = tog ? buffer_1 : buffer_2;
-
-  //test to see ping pong (you should see flashing lights):
-  // buffer_1.background(255, 0, 0);
-  // buffer_2.background(0, 0, 255);
-
   shader(main_shader);
-  main_shader.setUniform("u_map", current);
+  main_shader.setUniform("u_map", current_shader);
   main_shader.setUniform("u_res", [width, height]);
   rect(0, 0, width, height);
 
   //reverse the switch.
   tog = !tog;
-
-  if (frameCount > 1) {
-    inject_toggle = 0.0;
-  }
 }
 
 /* helpers */
 function set_uniforms(shader_name, prev_buffer) {
   shader_name.setUniform("u_prev", prev_buffer);
   shader_name.setUniform("u_res", [width * 1.0, height * 1.0]);
-  shader_name.setUniform("u_inject_toggle", inject_toggle);
-  shader_name.setUniform("u_seed_coords", [
-    seed_coords[0] * 1.0,
-    seed_coords[1] * 1.0,
-  ]);
+  shader_name.setUniform("u_inject_toggle", 0.0);
+}
+
+function mousePressed() {
+  current_shader.setUniform("u_inject_toggle", 1.0);
+  current_shader.setUniform("u_seed_coords", [mouseX * 1.0, mouseY * 1.0]);
 }

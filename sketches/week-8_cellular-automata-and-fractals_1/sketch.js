@@ -30,7 +30,7 @@ function preload() {
 
 function setup() {
   // createCanvas(1000, 562, WEBGL); //in 16:9 aspect ratio.
-  createCanvas(800, 800, WEBGL); //square to handle calculations better.
+  createCanvas(windowWidth, windowHeight, WEBGL); //square to handle calculations better.
   pixelDensity(1);
   noStroke();
 

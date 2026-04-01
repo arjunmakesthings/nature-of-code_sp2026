@@ -23,10 +23,8 @@ float give = 0.0;
 
 //to get neighbours:
 /* usage: 
-
 vec4 neighbours[8];
 get_neighbours(u_prev, vTexCoord, u_res, neighbours);
-
 */
 void get_neighbours(sampler2D tex, vec2 uv, vec2 res, out vec4 neighbours[8]) {
     // size of one pixel in UV space
@@ -46,26 +44,25 @@ void get_neighbours(sampler2D tex, vec2 uv, vec2 res, out vec4 neighbours[8]) {
 }
 
 void inject() {
-    curr = seed_amt;
+    if(u_inject_toggle == 1.0) {
+        vec2 px_coord = vTexCoord * u_res; // convert to px space.
+        float d = distance(px_coord, u_seed_coords);
+        if(d < 1.0) {
+            curr = seed_amt;
+        }
+    } else {
+        //nothing.
+    }
 }
 
 void main() {
-    //globals: 
-    vec2 px_coord = vTexCoord * u_res; // convert to px space.
     //previous state:
     vec4 prev = texture2D(u_prev, vTexCoord);
 
-    //inject seed: 
-    if(u_inject_toggle == 1.0) {
-        float d = distance(px_coord, u_seed_coords);
-        if(d < 1.0) {
-            inject();
-        }else{
-            curr = prev.r;
-        } 
-    } else {
-        curr = prev.r;
-    }
+    //reset to what you had. 
+    curr = prev.r;
+
+    inject(); 
 
     //two simple rules: if you have more than you can take, share with neighbours. if you have less, take from neighbours.
 
@@ -95,8 +92,7 @@ void main() {
                 curr += min(other_g / 8.0, capacity); //assuming there were eight numbers. this /8.0 is our loss for the pixels that cannot be processed here.
             }
         }
-    }
-    else if (curr == capacity){
+    } else if(curr == capacity) {
         //do nothing.
     }
         //send out as rgba: 
